@@ -2,8 +2,8 @@ name: Generate SDK Release Notes
 description: Generates Discord-formatted release notes from a git diff using GaaS
 
 inputs:
-  diff:
-    description: Raw git diff to generate release notes from (e.g. output of git diff v1.0.0..v1.1.0)
+  diff_file:
+    description: Path to a file containing the raw git diff to generate release notes from
     required: true
 
 outputs:
@@ -18,7 +18,6 @@ runs:
       id: call
       shell: bash
       env:
-        DIFF: ${{ inputs.diff }}
         GAAS_URL: https://private-kyc-api.platform.molops.net/internal/gaas/mex/sdk_release_notes_generator
         OIDC_AUDIENCE: https://private-kyc-api.platform.molops.net/internal/gaas/mex
       run: |
@@ -32,7 +31,7 @@ runs:
           exit 1
         fi
 
-        BODY=$(jq -n --arg diff "$DIFF" '{"diff": $diff}')
+        BODY=$(jq -n --rawfile diff "${{ inputs.diff_file }}" '{"diff": $diff}')
 
         RESPONSE=$(curl -sS -w "\n%{http_code}" \
           -X POST \
