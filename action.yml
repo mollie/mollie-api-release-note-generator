@@ -31,13 +31,13 @@ runs:
           exit 1
         fi
 
-        BODY=$(jq -n --rawfile diff "${{ inputs.diff_file }}" '{"diff": $diff}')
+        jq -n --rawfile diff "${{ inputs.diff_file }}" '{"diff": $diff}' > "$RUNNER_TEMP/body.json"
 
         RESPONSE=$(curl -sS -w "\n%{http_code}" \
           -X POST \
           -H "Authorization: Bearer $TOKEN" \
           -H "Content-Type: application/json" \
-          --data "$BODY" \
+          --data @"$RUNNER_TEMP/body.json" \
           "$GAAS_URL")
 
         HTTP_CODE=$(echo "$RESPONSE" | tail -1)
